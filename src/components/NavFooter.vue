@@ -9,5 +9,5 @@ export default {
   name: 'nav-footer'
 }
 </script>
-<style lang="stylus" scoped>
+<style lang="scss" scoped>
 </style>

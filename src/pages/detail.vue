@@ -9,5 +9,3 @@ export default {
   name: 'detail'
 }
 </script>
-<style lang="stylus" scoped>
-</style>

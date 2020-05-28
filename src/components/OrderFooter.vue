@@ -9,5 +9,5 @@ export default {
   name: 'order-footer'
 }
 </script>
-<style lang="stylus" scoped>
+<style lang="scss" scoped>
 </style>

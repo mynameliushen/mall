@@ -7,5 +7,5 @@ export default {
   name: 'order-header'
 }
 </script>
-<style lang="stylus" scoped>
+<style lang="scss" scoped>
 </style>

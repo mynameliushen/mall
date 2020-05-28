@@ -9,5 +9,3 @@ export default {
   name: 'order-confirm'
 }
 </script>
-<style lang="stylus" scoped>
-</style>
