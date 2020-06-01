@@ -13,7 +13,7 @@
           <a href="javascript:;" v-else @click="login">登陆</a>
           <a href="javascript:;" v-if="username">我的订单</a>
           <a href="javascript:;" v-else>注册</a>
-          <a href="javascript:;" class="my-cart" @click="gotoCart"><span class="icon-cart"></span>购物车</a>
+          <a href="javascript:;" class="my-cart" @click="gotoCart"><span class="icon-cart"></span>购物车({{cartCount}})</a>
         </div>
       </div>
     </div>
@@ -30,7 +30,7 @@
                 <li class="product" v-for="item of phoneList" :key="item.id">
                   <a :href="'/#/product/' + item.id" target="_blank">
                     <div class="pro-img">
-                      <img :src="item.mainImage" alt="">
+                      <img v-lazy="item.mainImage" alt="">
                     </div>
                     <div class="pro-name">{{item.name}}</div>
                     <div class="pro-price">{{item.price | currency}}</div>
@@ -59,11 +59,11 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex' 
 export default {
   name: 'nav-header',
   data () {
     return {
-      username: '刘神',
       phoneList: []
     }
   },
@@ -72,6 +72,12 @@ export default {
       if(!val) return '0.00'
       return '￥' + val.toFixed(2) + '元'
     }
+  },
+  computed: {
+    ...mapGetters([
+      'username',
+      'cartCount'
+    ])
   },
   mounted () {
     this.getProductList()

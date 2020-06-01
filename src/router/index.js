@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '@/components/home'
+import Home from '@/pages/home'
 Vue.use(VueRouter)
 
 const routes = [
@@ -26,6 +26,11 @@ const routes = [
         component: () => import('@/pages/detail'),
       }
     ]
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/pages/login')
   },
   {
     path: '/cart',

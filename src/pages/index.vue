@@ -10,7 +10,7 @@
                 <ul v-for="(item,index) in menuList" :key="index">
                   <li v-for="sub in item" :key="sub.id">
                     <a :href="sub ? '/#/product/'+sub.id : ''">
-                      <img :src="sub ? sub.img : '/imgs/item-box-1.png'" alt="">
+                      <img v-lazy="sub ? sub.img : '/imgs/item-box-1.png'" alt="">
                       {{ sub ? sub.name : '小米9'}}
                     </a>
                   </li>
@@ -49,17 +49,69 @@
           <div class="swiper-button-next" slot="button-next"></div>
         </swiper>
       </div>
-      <div class="ads-box"></div>
-      <div class="banner"></div>
-      <div class="product-box"></div>
+      <div class="ads-box">
+        <a v-for="item in adsList" :key="item.id" :href="'/#/product/'+item.id">
+          <img v-lazy="item.img" alt="">
+        </a>
+      </div>
+    </div>
+    <div class="wrapper">
+      <div class="container">
+        <div class="banner">
+          <a href="/#/product/30">
+            <img v-lazy="'/imgs/banner-1.png'" alt="">
+          </a>
+        </div>
+        <div class="product-box">
+          <div class="container">
+            <h2>手机</h2>
+            <div class="product-wrapper">
+              <div class="banner-left">
+                <a href="/#/product/35">
+                  <img v-lazy="'/imgs/mix-alpha.jpg'" alt="">
+                </a>
+              </div>
+              <div class="list-box">
+                <div class="list" v-for="(arr,index) in phoneList" :key="index">
+                  <div class="item" v-for="(item,index) in arr" :key="index">
+                    <span :class="{'new-pro': index%2===0}">新品</span>
+                    <div class="item-img">
+                      <img v-lazy="item.mainImage" alt="">
+                    </div>
+                    <div class="item-info">
+                      <h3>{{item.name}}</h3>
+                      <p>{{item.subtitle}}</p>
+                      <p class="price" @click="addCart(item.id)">{{item.price}}元</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <service-bar />
+    <modal
+      title="提示"
+      sureText="查看购物车"
+      modalType="middle"
+      :showModal="showModal"
+      @submit="goCart"
+      @cancel="showModal=false"
+      btnType="1"
+    >
+      <template #body>
+        <p>商品添加成功！</p>
+      </template>
+    </modal>
   </div>
 </template>
 
 <script>
 import ServiceBar from '@/components/ServiceBar'
 import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
+import Modal from '@/components/Modal'
 import 'swiper/css/swiper.css'
 
 export default {
@@ -129,7 +181,27 @@ export default {
           }
         ],
         [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-      ]
+      ],
+      adsList: [
+        {
+          id: 33,
+          img: '/imgs/ads/ads-1.png' 
+        },
+        {
+          id: 48,
+          img: '/imgs/ads/ads-2.jpg' 
+        },
+        {
+          id: 45,
+          img: '/imgs/ads/ads-3.png' 
+        },
+        {
+          id: 47,
+          img: '/imgs/ads/ads-4.jpg' 
+        }
+      ],
+      phoneList: [],
+      showModal: false,
     }
   },
   computed: {
@@ -137,24 +209,57 @@ export default {
       return this.$refs.mySwiper.$swiper
     }
   },
+  filters: {
+    currency (val) {
+      if(!val) return '0.00'
+      return '￥' + val.toFixed(2) + '元'
+    }
+  },
   mounted () {
-    // this.mySwiper.slideTo(3, 1000, false)
+    this.init()
+  },
+  methods: {
+    init () {
+      this.axios.get('/products',{
+        params: {
+          categoryId: 100012,
+          pageSize: 14
+        }
+      }).then(res => {
+        res.list = res.list.slice(6,14)
+        this.phoneList = [res.list.slice(0,4),res.list.slice(4,8)]
+      })
+    },
+    addCart (id) {
+      this.showModal = true
+      this.axios.post('/carts', {
+        productId:id,
+        selected: true
+      }).then(res=> {
+        this.showModal = true
+        this.$store.dispatch('saveCartCount', res.cartTotalQuantity)
+      }).catch(err => {
+        console.log(err);
+        this.showModel = true
+      })
+    },
+    goCart () {
+      this.$router.push('/cart')
+    }
   },
   components: {
     Swiper,
     SwiperSlide,
     ServiceBar,
-    
+    Modal
   }
 }
 </script>
 <style lang="scss" scoped>
 @import '@/styles/mixin.scss';
 @import '@/styles/config.scss';
+@import '@/styles/base.scss';
 .index {
-  width: 1226px;
-  margin:0 auto;
-  
   .swiper-box {
 
     .nav-menu{
@@ -241,5 +346,118 @@ export default {
     }
   }
 
+  .ads-box {
+    @include flex();
+    margin-top: 14px;
+    margin-bottom: 31px;
+    a {
+      width: 296px;
+      height: 167px;
+    }
+  }
+
+  .wrapper{
+    background-color: $colorJ;
+    .banner {
+      margin-bottom: 50px;
+    }
+
+    .product-box {
+      padding-top: 30px;
+      padding-bottom: 50px;
+
+      h2 {
+        font-size: $fontF;
+        height: 21px;
+        line-height: 21px;
+        color: $colorB;
+        margin-bottom: 20px;
+      }
+
+
+      .product-wrapper {
+        display: flex;
+
+        .banner-left {
+          margin-right: 16px;
+          img {
+            width:224px;
+            height: 619px;
+          }
+        }
+        .list-box {
+          flex: 1;
+          .list {
+            @include flex();
+            width: 986px;
+            margin-bottom:14px;
+            &:last-child {
+              margin-bottom: 0;
+            }
+
+            .item {
+              width: 236px;
+              height: 302px;
+              background-color: $colorG;
+              text-align: center;
+              
+              &:hover {
+                z-index: 2;
+                box-shadow: 0 15px 30px rgba(0,0,0,.1);
+                -webkit-transform: translate3d(0,-2px,0);
+                transform: translate3d(0,-2px,0);
+              }
+              span {
+                display: inline-block;
+                width: 67px;
+                height: 24px;
+                line-height: 24px;
+                color: #FFF;
+                &.new-pro {
+                  background-color: #7ECF68;
+                }
+                &.kill-pro {
+                  background-color: #E82626;
+                }
+              }
+              .item-img {
+                
+                img {
+                  width: 100%;
+                  height: 195px;
+                }
+              }
+              .item-info {
+                h3 {
+                  font-size: $fontJ;
+                  color: $colorB;
+                  line-height: $fontJ;
+                  font-weight: bold;
+                }
+                p {
+                  color: $colorD;
+                  line-height: 13px;
+                  margin-top: 6px;
+                  margin-bottom: 13px;
+                }
+                .price {
+                  color: #F20a0a;
+                  font-size: $fontJ;
+                  font-weight: bold;
+                  cursor: pointer;
+                  &:after {
+                    content: '';
+                    margin-left: 5px;
+                    @include bgImg(22px, 22px, '/imgs/icon-cart-hover.png');
+                    vertical-align: middle;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 </style>
